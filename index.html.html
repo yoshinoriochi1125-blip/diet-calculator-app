@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ダイエットカロリー計算アプリ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .radio-option {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .radio-option label {
+            display: block;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .radio-option label:hover {
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .results {
+            margin-top: 30px;
+            padding: 25px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .results h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 24px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .result-label {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .result-value {
+            color: #333;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .result-unit {
+            color: #999;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .macros-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .macro-item {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .macro-label {
+            color: #666;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .macro-value {
+            color: #667eea;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .note {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+
+            .macros-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 ダイエットカロリー計算</h1>
+        <p class="subtitle">ミフリン=サンジョール式を使用した科学的な計算</p>
+
+        <form id="dietForm">
+            <div class="form-group">
+                <label>性別</label>
+                <div class="radio-group">
+                    <div class="radio-option">
+                        <input type="radio" name="gender" value="male" id="male" required>
+                        <label for="male">👨 男性</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" name="gender" value="female" id="female" required>
+                        <label for="female">👩 女性</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="age">年齢</label>
+                <input type="number" id="age" min="15" max="100" required placeholder="例: 30">
+            </div>
+
+            <div class="form-group">
+                <label for="height">身長 (cm)</label>
+                <input type="number" id="height" min="100" max="250" step="0.1" required placeholder="例: 170">
+            </div>
+
+            <div class="form-group">
+                <label for="weight">体重 (kg)</label>
+                <input type="number" id="weight" min="30" max="300" step="0.1" required placeholder="例: 70">
+            </div>
+
+            <div class="form-group">
+                <label for="activity">普段の運動量</label>
+                <select id="activity" required>
+                    <option value="">選択してください</option>
+                    <option value="1.2">座り仕事中心（ほとんど運動なし）</option>
+                    <option value="1.375">軽い運動（週1-3回）</option>
+                    <option value="1.55">中程度の運動（週3-5回）</option>
+                    <option value="1.725">高強度の運動（週6-7回）</option>
+                    <option value="1.9">非常に高強度（1日2回の運動、肉体労働）</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="goal">目的</label>
+                <select id="goal" required>
+                    <option value="">選択してください</option>
+                    <option value="-500">減量（-500kcal/日）</option>
+                    <option value="-300">緩やかな減量（-300kcal/日）</option>
+                    <option value="0">現状維持</option>
+                    <option value="300">緩やかな増量（+300kcal/日）</option>
+                    <option value="500">増量（+500kcal/日）</option>
+                </select>
+            </div>
+
+            <button type="submit">計算する</button>
+        </form>
+
+        <div id="results" class="results">
+            <h2>📊 あなたの栄養目標</h2>
+            
+            <div class="result-item">
+                <div class="result-label">1日の目標カロリー</div>
+                <div class="result-value" id="calories">0 <span class="result-unit">kcal</span></div>
+            </div>
+
+            <div class="result-item">
+                <div class="result-label">基礎代謝量 (BMR)</div>
+                <div class="result-value" id="bmr">0 <span class="result-unit">kcal</span></div>
+            </div>
+
+            <div class="macros-grid">
+                <div class="macro-item">
+                    <div class="macro-label">タンパク質</div>
+                    <div class="macro-value" id="protein">0g</div>
+                </div>
+                <div class="macro-item">
+                    <div class="macro-label">脂質</div>
+                    <div class="macro-value" id="fat">0g</div>
+                </div>
+                <div class="macro-item">
+                    <div class="macro-label">炭水化物</div>
+                    <div class="macro-value" id="carbs">0g</div>
+                </div>
+            </div>
+
+            <div class="note">
+                <strong>💡 栄養バランスについて：</strong><br>
+                • タンパク質：体重1kgあたり2g（筋肉維持・増強）<br>
+                • 脂質：総カロリーの25%（ホルモン生成に必要）<br>
+                • 炭水化物：残りのカロリーから算出（エネルギー源）
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('dietForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 入力値の取得
+            const gender = document.querySelector('input[name="gender"]:checked').value;
+            const age = parseFloat(document.getElementById('age').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const activityLevel = parseFloat(document.getElementById('activity').value);
+            const goalAdjustment = parseFloat(document.getElementById('goal').value);
+
+            // BMR計算（ミフリン=サンジョール式）
+            let bmr;
+            if (gender === 'male') {
+                bmr = 10 * weight + 6.25 * height - 5 * age + 5;
+            } else {
+                bmr = 10 * weight + 6.25 * height - 5 * age - 161;
+            }
+
+            // TDEE計算（運動量を考慮）
+            const tdee = bmr * activityLevel;
+
+            // 目標カロリー計算
+            const targetCalories = tdee + goalAdjustment;
+
+            // マクロ栄養素の計算
+            // タンパク質: 体重1kgあたり2g
+            const proteinGrams = weight * 2;
+            const proteinCalories = proteinGrams * 4;
+
+            // 脂質: 総カロリーの25%
+            const fatCalories = targetCalories * 0.25;
+            const fatGrams = fatCalories / 9;
+
+            // 炭水化物: 残りのカロリー
+            const carbCalories = targetCalories - proteinCalories - fatCalories;
+            const carbGrams = carbCalories / 4;
+
+            // 結果の表示
+            document.getElementById('bmr').innerHTML = Math.round(bmr) + ' <span class="result-unit">kcal</span>';
+            document.getElementById('calories').innerHTML = Math.round(targetCalories) + ' <span class="result-unit">kcal</span>';
+            document.getElementById('protein').textContent = Math.round(proteinGrams) + 'g';
+            document.getElementById('fat').textContent = Math.round(fatGrams) + 'g';
+            document.getElementById('carbs').textContent = Math.round(carbGrams) + 'g';
+
+            // 結果エリアを表示
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.add('show');
+            
+            // 結果エリアまでスムーズにスクロール
+            setTimeout(() => {
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        });
+    </script>
+</body>
+</html>
